@@ -62,19 +62,42 @@ func base62Gen (hashed []byte) string {
 	return string(result)
 }
 
-func GenerateShortURL (originalURL string, attempt int) string {
-	targetURL := originalURL
+const maxRetries = 10
 
-	if attempt > 0 {
-		targetURL = fmt.Sprintf("%s |CollisonSalt: %d",targetURL,attempt)
-	}
-	hash := generateHash([]byte(targetURL))
-	base62 := base62Gen(hash[:])  // arry --> slice
+func GenerateShortURL (originalURL string, repo URLRepository) (string,error) {
+	for attempt := 0;attempt < maxRetries; attempt++ {
+		targetURL := originalURL
+		if attempt > 0 {
+			targetURL = fmt.Sprintf("%s:collisioon-salt:%d",originalURL,attempt)
+		}
+		hash := generateHash([]byte(targetURL))
+		encode := base62Gen(hash[:])  // to convert arr --> slice
+		for len(encode) < 7 {
+			encode = "0" + encode
+		}
+		shortURL := encode[:7]
 
-	for base62 < "7" {
-		base62 = "0" + base62
-	
+		// insert into db...
+		err := repo.Save(URLMapping{
+			LongURL: originalURL,
+			ShortURL: shortURL,
+		})
+		
+		if err == nil {
+			// insert succeced, no collision........
+			return shortURL, nil
+		}
+
+		// insert failed (duplicate or real collision)
+		existing, findErr := repo.FindByShortURL(shortURL) 
+		if findErr != nil {
+			return "",findErr
+		}
+		if existing.LongURL == originalURL {
+			//same url (return existing shortyy) 
+			return existing.ShortURL, nil
+		}
 	}
-	return base62[:7]
+	return "",fmt.Errorf("Could not genrate unique short URL after %d attempt",maxRetries)
 	
 }
