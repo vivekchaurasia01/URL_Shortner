@@ -88,7 +88,7 @@ func GenerateShortURL (originalURL string, repo URLRepository) (string,error) {
 			return shortURL, nil
 		}
 
-		// insert failed (duplicate or real collision)
+		// insertion failed (duplicate or real collision)
 		existing, findErr := repo.FindByShortURL(shortURL) 
 		if findErr != nil {
 			return "",findErr
