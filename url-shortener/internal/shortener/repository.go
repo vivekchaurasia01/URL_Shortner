@@ -38,5 +38,15 @@ func (r *URLPostregesRepository) Save (mapping URLMapping) error {
 }
 
 func (r *URLPostregesRepository) FindByShortURL (shortURL string) (*URLMapping, error) {
+	row := r.db.QueryRow(
+		context.Background(),
+		"SELECT id, longurl,shorturl,created_at FROM urls WHERE shorturl = $1",
+		shortURL,
+	)
+	var m URLMapping
 	
+	if err := row.Scan(&m.ID, &m.LongURL, &m.ShortURL, &m.CreatedAt); err != nil {
+		return nil, err
+	}
+	return &m, nil
 }
