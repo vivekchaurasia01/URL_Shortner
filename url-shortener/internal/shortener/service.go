@@ -2,11 +2,12 @@ package shortener
 
 import (
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"math/big"
 )
 
-
+var ErrDuplicateShortURL = errors.New("Dulplicate url")
 // to generate sha256....
 
 // func sha256C(data []byte) [size]byte {
@@ -24,7 +25,7 @@ import (
 // }
 
 
-             								// or
+// or
 
 func generateHash(data []byte) [32]byte {
     return sha256.Sum256(data)

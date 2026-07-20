@@ -30,7 +30,7 @@ func (r *URLPostregesRepository) Save (mapping URLMapping) error {
 		if errors.As(err,&pgErr) && pgErr.Code == "23505" {  //23505 collison err..
 			return ErrDuplicateShortURL
 		}
-		return err  // other err than collision...
+		return err  // return other err than collision...
 	}
 	return nil
 
