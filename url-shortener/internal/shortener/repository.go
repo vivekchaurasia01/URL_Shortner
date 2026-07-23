@@ -50,3 +50,16 @@ func (r *URLPostregesRepository) FindByShortURL (shortURL string) (*URLMapping, 
 	}
 	return &m, nil
 }
+
+func (r *URLPostregesRepository) GetClickCount(shortURL string) (int64, error) {
+	row := r.db.QueryRow(
+		context.Background(),
+		"SELECT COUNT(*) FROM click_events WHERE shorturl = $1",
+		shortURL,
+	)
+	var count int64
+	if err := row.Scan(&count); err != nil {
+		return 0, err
+	}
+	return count, nil
+}

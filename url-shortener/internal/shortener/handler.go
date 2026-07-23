@@ -5,6 +5,7 @@ import (
     "net/http"
 )
 
+
 type Handler struct {
     repo URLRepository
 }
@@ -19,6 +20,11 @@ type shortenRequest struct {
 
 type shortenResponse struct {
     ShortURL string `json:"short_url"`
+}
+
+type statsResponse struct {
+	ShortURL string `json:"short_url"`
+	Clicks   int64  `json:"clicks"`
 }
 
 func (h *Handler) ShortenURL(w http.ResponseWriter, r *http.Request) {
@@ -47,4 +53,21 @@ func (h *Handler) ShortenURL(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(http.StatusCreated)
     json.NewEncoder(w).Encode(shortenResponse{ShortURL: shortURL})
+}
+
+func (h *Handler) GetStats(w http.ResponseWriter, r *http.Request) {
+	code := r.PathValue("code")
+	if code == "" {
+		http.Error(w, "code is required", http.StatusBadRequest)
+		return
+	}
+
+	count, err := h.repo.GetClickCount(code)
+	if err != nil {
+		http.Error(w, "could not fetch stats", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(statsResponse{ShortURL: code, Clicks: count})
 }

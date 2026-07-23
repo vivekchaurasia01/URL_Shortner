@@ -32,7 +32,12 @@
 
   document.getElementById('year').textContent = new Date().getFullYear();
 
+  // Falls back to localhost:8081 if index.html doesn't define it —
+  // set window.SHORTDO_REDIRECTOR_BASE in index.html to override.
+  const REDIRECTOR_BASE = window.SHORTDO_REDIRECTOR_BASE || 'http://127.0.0.1:8081';
+
   let session = null; // { id, name, email, plan: 'free' | 'pro' } | null
+  let statsPollTimer = null;
 
   function showToast(message, isError) {
     toast.textContent = message;
@@ -56,7 +61,6 @@
     const isPro = session?.plan === 'pro';
     const isLoggedIn = !!session;
 
-    // header
     headerActions.innerHTML = isLoggedIn
       ? `<span>${session.name}</span> <button class="btn btn-ghost btn-sm" id="logout-btn">Log out</button>`
       : `<a href="login.html">Log in</a>`;
@@ -73,17 +77,14 @@
       });
     }
 
-    // custom alias: Pro only
     aliasToggle.disabled = !isPro;
     aliasProBadge.classList.toggle('hidden', isPro);
     if (!isPro) aliasRow.classList.remove('visible');
 
-    // free tier card
     freeLoginPerk.classList.toggle('hidden', isLoggedIn);
     freeCta.textContent = isLoggedIn ? 'Logged in' : 'Log in';
     freeCta.disabled = isLoggedIn;
 
-    // pro tier card
     proCta.textContent = isPro ? 'Current plan' : 'Subscribe';
     proCta.disabled = isPro;
 
@@ -115,7 +116,6 @@
     }
   });
 
-  // ---------- custom alias toggle ----------
   aliasToggle.addEventListener('click', () => {
     if (aliasToggle.disabled) {
       showToast('Custom aliases are a Pro feature');
@@ -154,23 +154,41 @@
     }
   });
 
- function showResult(data) {
-  resultLink.textContent = data.short_url;
+function showResult(data) {
+  // Stop any polling from a previous result before starting a new one.
+  if (statsPollTimer) {
+    clearInterval(statsPollTimer);
+    statsPollTimer = null;
+  }
 
-  // But make the link point to your redirect service
-  resultLink.href = `http://localhost:8081/${data.short_url}`;
+  const code = data.code || data.short_url;
+  const displayUrl = `${REDIRECTOR_BASE}/${code}`;
+
+  resultLink.textContent = code;
+  resultLink.href = displayUrl;
 
   const isPro = session?.plan === 'pro';
-  resultMeta.textContent = isPro
-    ? '0 clicks · never expires'
-    : '0 clicks · expires in 24h if unused';
+  const expiryText = isPro ? 'never expires' : 'expires in 24h if unused';
+
+  function refreshStats() {
+    Api.getStats(code)
+      .then((stats) => {
+        resultMeta.textContent = `${stats.clicks} click${stats.clicks === 1 ? '' : 's'} · ${expiryText}`;
+      })
+      .catch(() => {
+        resultMeta.textContent = `0 clicks · ${expiryText}`;
+      });
+  }
+
+  resultMeta.textContent = `loading clicks… · ${expiryText}`;
+  refreshStats();
+
+  // Poll every 5s so the count updates live while this result is visible.
+  statsPollTimer = setInterval(refreshStats, 5000);
 
   qrPanel.classList.remove('visible');
   resultCard.classList.add('visible');
-  resultCard.scrollIntoView({
-    behavior: 'smooth',
-    block: 'nearest'
-  });
+  resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
   copyBtn.addEventListener('click', async () => {

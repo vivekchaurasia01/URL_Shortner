@@ -5,6 +5,7 @@
  * Expected backend contract (adjust paths to match your router):
  *
  *   POST   /api/shorten          { url, alias? }        -> { code, short_url, expires_at }
+ *   GET    /api/urls/{code}/stats                        -> { short_url, clicks }
  *   GET    /api/me                                       -> { id, name, email, plan } | 401
  *   POST   /api/auth/login       { email, password }     -> { token, user } , sets httpOnly cookie
  *   POST   /api/auth/register    { name, email, password }
@@ -61,6 +62,10 @@ async function request(path, { method = 'GET', body, headers = {} } = {}) {
 const Api = {
   shorten(url, alias) {
     return request('/api/shorten', { method: 'POST', body: alias ? { url, alias } : { url } });
+  },
+
+  getStats(code) {
+    return request(`/api/urls/${code}/stats`);
   },
 
   me() {

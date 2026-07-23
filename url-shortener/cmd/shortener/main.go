@@ -68,6 +68,7 @@ func main() {
 	// Router
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /api/shorten", shortenerHandler.ShortenURL)
+	mux.HandleFunc("GET /api/urls/{code}/stats", shortenerHandler.GetStats)
 	authHandler.Routes(mux)
 
 	srv := &http.Server{

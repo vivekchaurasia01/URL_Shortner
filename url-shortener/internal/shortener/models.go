@@ -12,4 +12,5 @@ type URLMapping struct {
 type URLRepository interface {
     Save(mapping URLMapping) error
     FindByShortURL(ShortURL string) (*URLMapping, error)
+    GetClickCount(shortURL string) (int64, error)
 }
