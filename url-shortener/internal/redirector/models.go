@@ -1,8 +1,12 @@
 package redirector
 
+import "time"
+
 
 type URLMapping struct {
-    LongURL  string
-    ShortURL string
+    ID        int
+    LongURL   string
+    ShortURL  string
+    CreatedAt time.Time
 }
 

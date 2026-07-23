@@ -6,3 +6,6 @@ CREATE TABLE IF NOT EXISTS urls (
     CONSTRAINT urls_shorturl_unique UNIQUE (shorturl)
 );
 
+
+
+

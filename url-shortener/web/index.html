@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>blue.ly — Shorten a URL</title>
+<meta name="description" content="Paste a long link, get a short one instantly." />
+<link rel="stylesheet" href="css/style.css" />
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer></script>
+</head>
+<body>
+<div class="page">
+
+  <header class="site-header container">
+    <a href="/" class="logo">blue<span class="dot">.</span>ly</a>
+    <nav class="header-actions" id="header-actions">
+      <!-- populated by app.js depending on session state -->
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Shorten a link</h1>
+      <p>Paste a long URL, get a short one instantly.</p>
+    </section>
+
+    <section class="card shorten-card">
+      <form id="shorten-form" novalidate>
+        <div class="input-row">
+          <input
+            id="url-input"
+            class="text-input"
+            type="url"
+            inputmode="url"
+            placeholder="https://example.com/your-long-url"
+            autocomplete="off"
+            required
+          />
+          <button type="submit" class="btn btn-primary" id="shorten-btn">Shorten</button>
+        </div>
+        <p class="field-error" id="url-error">Enter a valid URL, including https://</p>
+
+        <div class="customize-row">
+          <button type="button" class="customize-toggle" id="alias-toggle">
+            <svg id="alias-lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            Customize your link
+          </button>
+          <span class="pro-badge" id="alias-pro-badge">Pro</span>
+        </div>
+
+        <div class="alias-row" id="alias-row">
+          <span class="alias-prefix">blue.ly/</span>
+          <input
+            id="alias-input"
+            class="text-input"
+            type="text"
+            placeholder="my-link"
+            maxlength="30"
+            pattern="[a-zA-Z0-9\-_]+"
+          />
+        </div>
+      </form>
+    </section>
+
+    <section class="card result-card" id="result-card">
+      <div class="result-top">
+        <a class="result-link" id="result-link" href="#" target="_blank" rel="noopener"></a>
+        <div class="result-actions">
+          <button class="icon-btn" id="copy-btn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+            Copy
+          </button>
+          <button class="icon-btn" id="qr-btn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v3M17 20h4"/></svg>
+            QR
+          </button>
+        </div>
+      </div>
+      <p class="result-meta" id="result-meta"></p>
+      <div class="qr-panel" id="qr-panel"><canvas id="qr-canvas"></canvas></div>
+    </section>
+
+    <section class="tiers">
+      <div class="card tier-card" id="tier-free">
+        <div class="tier-name">Free</div>
+        <ul class="tier-features">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            2 short URLs per week
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            Link expires after 24 hours
+          </li>
+          <li id="free-login-perk">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+            Log in for 1 extra URL
+          </li>
+        </ul>
+        <button class="btn btn-secondary btn-block" id="free-cta">Log in</button>
+      </div>
+
+      <div class="card tier-card is-pro" id="tier-pro">
+        <span class="tier-pro-flag">Pro</span>
+        <div class="tier-name">Pro</div>
+        <ul class="tier-features">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            QR code generation
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+            Full click analytics
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
+            Custom URL alias
+          </li>
+        </ul>
+        <button class="btn btn-primary btn-block" id="pro-cta">Subscribe</button>
+      </div>
+    </section>
+
+    <p class="trust-line" id="trust-line">2 free links a week (3 if logged in) · Pro links come with QR, analytics and custom URLs</p>
+
+    <section class="faq">
+      <div class="faq-item">
+        <h3>How many links can I create free?</h3>
+        <p>2 per week, 3 if you log in — each expires after 24 hours of inactivity.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What does Pro add?</h3>
+        <p>QR codes, click analytics, and custom URL aliases that never expire.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How do I get a QR code?</h3>
+        <p>Available on Pro — tap QR on the result card after shortening.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer container">
+    &copy; <span id="year"></span> blue.ly
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  window.SHORTDO_API_BASE = 'http://127.0.0.1:8080';
+</script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

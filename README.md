@@ -6,3 +6,5 @@ what we can add in future ...
 2 --> payment
 3 --> distributed system (umm..it can be hectic and baseless but surely try)
 4 --> custom Url
+5 --> qr code
+6 --> premium (payment)

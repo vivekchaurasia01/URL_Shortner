@@ -19,8 +19,8 @@ func (r *URLPostgresRepository) FindByShortURL(shortURL string) (*URLMapping, er
         shortURL,
     )
     var m URLMapping
-    if err := row.Scan(&m.LongURL, &m.ShortURL); err != nil {
-        return nil, err
-    }
+	if err := row.Scan(&m.ID, &m.LongURL, &m.ShortURL, &m.CreatedAt); err != nil {
+		return nil, err
+	}
     return &m, nil
 } 
